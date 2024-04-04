@@ -81,7 +81,7 @@ const errKey = "err"
 
 var (
 	defaultLevel      = slog.LevelInfo
-	defaultTimeFormat = time.StampMilli
+	defaultTimeFormat = time.DateTime
 )
 
 // Options for a slog.Handler that writes tinted logs. A zero Options consists
