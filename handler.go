@@ -79,6 +79,8 @@ const (
 
 const errKey = "err"
 
+const PromptKey = "prompt"
+
 var (
 	defaultLevel      = slog.LevelInfo
 	defaultTimeFormat = time.DateTime
@@ -91,6 +93,9 @@ var (
 type Options struct {
 	// Enable source code location (Default: false)
 	AddSource bool
+
+	// Prompt msg
+	Prompt string
 
 	// Minimum level to log (Default: slog.LevelInfo)
 	Level slog.Leveler
@@ -117,7 +122,7 @@ func NewHandler(w io.Writer, opts *Options) slog.Handler {
 	if opts == nil {
 		return h
 	}
-
+	h.prompt = opts.Prompt
 	h.addSource = opts.AddSource
 	if opts.Level != nil {
 		h.level = opts.Level
@@ -134,6 +139,7 @@ func NewHandler(w io.Writer, opts *Options) slog.Handler {
 type handler struct {
 	attrsPrefix string
 	groupPrefix string
+	prompt      string
 	groups      []string
 
 	mu sync.Mutex
@@ -194,6 +200,17 @@ func (h *handler) Handle(_ context.Context, r slog.Record) error {
 	} else if a := rep(nil /* groups */, slog.Any(slog.LevelKey, r.Level)); a.Key != "" {
 		h.appendValue(buf, a.Value, false)
 		buf.WriteByte(' ')
+	}
+
+	// write prompt
+	if h.prompt != "" {
+		if rep == nil {
+			buf.WriteString(h.prompt)
+			buf.WriteByte(' ')
+		} else if a := rep(nil, slog.String(PromptKey, h.prompt)); a.Key != "" {
+			h.appendValue(buf, a.Value, false)
+			buf.WriteByte(' ')
+		}
 	}
 
 	// write source
