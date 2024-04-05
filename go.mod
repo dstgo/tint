@@ -1,3 +1,3 @@
-module github.com/dstgo/tint
+module github.com/ginx-contribs/tint
 
 go 1.21
