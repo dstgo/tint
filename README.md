@@ -4,12 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/lmittmann/tint)](https://goreportcard.com/report/github.com/lmittmann/tint)
 
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/lmittmann/tint/assets/3458786/3d42f8d5-8bdf-40db-a16a-1939c88689cb">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/lmittmann/tint/assets/3458786/3d42f8d5-8bdf-40db-a16a-1939c88689cb">
     <img src="./image/example.png">
 </picture>
-<br>
-<br>
 
 Package `tint` implements a zero-dependency [`slog.Handler`](https://pkg.go.dev/log/slog#Handler)
 that writes tinted (colorized) logs. Its output format is inspired by the `zerolog.ConsoleWriter` and
@@ -21,7 +17,7 @@ which is a drop-in replacement for [`slog.HandlerOptions`](https://pkg.go.dev/lo
 ## Install
 
 ```
-go get github.com/dstgo/tint@latest
+go get github.com/ginx-contribs/tint@latest
 ```
 
 ## Usage
