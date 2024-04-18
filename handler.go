@@ -84,6 +84,20 @@ const PromptKey = "prompt"
 var (
 	defaultLevel      = slog.LevelInfo
 	defaultTimeFormat = time.DateTime
+
+	DefaultLevelNames = map[slog.Level]string{
+		slog.LevelDebug: slog.LevelDebug.String(),
+		slog.LevelInfo:  slog.LevelInfo.String(),
+		slog.LevelWarn:  slog.LevelWarn.String(),
+		slog.LevelError: slog.LevelError.String(),
+	}
+
+	CompactLevelNames = map[slog.Level]string{
+		slog.LevelDebug: "DBG",
+		slog.LevelInfo:  "INF",
+		slog.LevelWarn:  "WRN",
+		slog.LevelError: "ERR",
+	}
 )
 
 // Options for a slog.Handler that writes tinted logs. A zero Options consists
@@ -109,6 +123,9 @@ type Options struct {
 
 	// Disable color (Default: false)
 	NoColor bool
+
+	// overwrite level name
+	LevelNames map[slog.Level]string
 }
 
 // NewHandler creates a [slog.Handler] that writes tinted logs to Writer w,
@@ -131,7 +148,11 @@ func NewHandler(w io.Writer, opts *Options) slog.Handler {
 	if opts.TimeFormat != "" {
 		h.timeFormat = opts.TimeFormat
 	}
+	if opts.LevelNames == nil {
+		opts.LevelNames = CompactLevelNames
+	}
 	h.noColor = opts.NoColor
+	h.levels = opts.LevelNames
 	return h
 }
 
@@ -150,6 +171,7 @@ type handler struct {
 	replaceAttr func([]string, slog.Attr) slog.Attr
 	timeFormat  string
 	noColor     bool
+	levels      map[slog.Level]string
 }
 
 func (h *handler) clone() *handler {
@@ -302,21 +324,21 @@ func (h *handler) appendTime(buf *buffer, t time.Time) {
 func (h *handler) appendLevel(buf *buffer, level slog.Level) {
 	switch {
 	case level < slog.LevelInfo:
-		buf.WriteString(slog.LevelDebug.String())
+		buf.WriteString(h.levels[slog.LevelDebug])
 		appendLevelDelta(buf, level-slog.LevelDebug)
 	case level < slog.LevelWarn:
 		buf.WriteStringIf(!h.noColor, ansiBrightGreen)
-		buf.WriteString(slog.LevelInfo.String())
+		buf.WriteString(h.levels[slog.LevelInfo])
 		appendLevelDelta(buf, level-slog.LevelInfo)
 		buf.WriteStringIf(!h.noColor, ansiReset)
 	case level < slog.LevelError:
 		buf.WriteStringIf(!h.noColor, ansiBrightYellow)
-		buf.WriteString(slog.LevelWarn.String())
+		buf.WriteString(h.levels[slog.LevelWarn])
 		appendLevelDelta(buf, level-slog.LevelWarn)
 		buf.WriteStringIf(!h.noColor, ansiReset)
 	default:
 		buf.WriteStringIf(!h.noColor, ansiBrightRed)
-		buf.WriteString(slog.LevelError.String())
+		buf.WriteString(h.levels[slog.LevelError])
 		appendLevelDelta(buf, level-slog.LevelError)
 		buf.WriteStringIf(!h.noColor, ansiReset)
 	}
